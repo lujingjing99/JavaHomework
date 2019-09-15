@@ -1,0 +1,148 @@
+public abstract class GenericMatrix<E extends Number> {
+	protected abstract E add(E e1, E e2);
+	protected abstract E multiply(E e1, E e2);
+	protected abstract E zero();
+	public E[][] matrixAdd(E m1[][], E m2[][]) {
+		if (m1.length != m2.length || m1[0].length != m2[0].length)
+			throw new RuntimeException("矩阵类型不一致，无法进行加法计算");
+		
+		E[][] result = (E[][])new Number[m1.length][m2[0].length];
+		
+		// 相加操作
+		for (int i = 0; i < result.length; i++)
+			for (int j = 0; j < result[0].length; j++) {
+				result[i][j] = (E) this.add(m1[i][j], m2[i][j]);
+			}
+		return result;
+	}
+	
+	/** 矩阵乘法 */
+	public E[][] matrixMultiply(E m1[][], E m2[][]) {
+		// 矩阵边界判断
+		if (m1[0].length != m2.length)
+			throw new RuntimeException("矩阵类型不匹配，无法进行乘法计算");
+		
+		E[][] result = (E[][])new Number[m1.length][m2[0].length];
+		
+		// 乘法操作 
+		for (int i = 0; i < result.length; i++)
+			for (int j = 0; j < result[0].length; j++) {
+				result[i][j] = this.zero();
+				
+				for (int k = 0; k < m1[0].length; k++) {
+					result[i][j] = this.add(result[i][j], this.multiply(m1[i][k], m2[k][j]));
+				}
+			}
+		return result;
+	}
+	
+	/** 打印输出 */
+	public void printResult(Number m1[][], Number m2[][], Number m3[][], char op) {
+		for (int i = 0; i < m1.length; i++) {
+			for (int j = 0; j < m1[0].length; j++)
+				System.out.print(" " + m1[i][j]);
+			
+			if (i == m1.length / 2)
+				System.out.print(" " + op + " ");
+			else
+				System.out.print("   ");
+			
+			for (int j = 0; j < m2[0].length; j++)
+				System.out.print(" " + m2[i][j]);
+			
+			if (i == m1.length / 2)
+				System.out.print(" " + "=" + " ");
+			else
+				System.out.print("   ");
+			
+			for (int j = 0; j < m3.length; j++)
+				System.out.print(m3[i][j] + " ");
+			
+			System.out.println ();
+		}
+	}
+}
+
+
+
+/**
+ * 整型矩阵类
+ * @author FF
+ *
+ */
+public class IntegerMatrix extends GenericMatrix<Integer>{
+	
+	@Override
+	protected Integer add(Integer e1, Integer e2) {
+		return e1 + e2;
+	}
+
+	@Override
+	protected Integer multiply(Integer e1, Integer e2) {
+		return e1 * e2;
+	}
+
+	@Override
+	protected Integer zero() {
+		return 0;
+	}
+}
+
+
+
+/**
+ * 有理数矩阵类
+ * @author FF
+ *
+ */
+public class RationalMatrix extends GenericMatrix<Rational>{
+
+	@Override
+	protected Rational add(Rational r1, Rational r2) {
+		return r1.add(r2);
+	}
+
+	@Override
+	protected Rational multiply(Rational r1, Rational r2) {
+		return r1.multiply(r2);
+	}
+
+	@Override
+	protected Rational zero() {
+		return new Rational(0, 1);
+	}
+}
+
+
+
+/** 测试IntegerMatrix类 */
+	@Test
+	public void testIntegerMatrix() {
+		GenericMatrix<Integer> gm = new IntegerMatrix();
+		Integer[][] m1 = {{1, 2, 3}, {4, 5, 6}, {1, 1, 1}};
+		Integer[][] m2 = {{1, 1, 1}, {2, 2, 2}, {0, 0, 0}};
+		
+		gm.printResult(m1, m2, gm.matrixAdd(m1, m2), '+');
+		System.out.println("");
+		gm.printResult(m1, m2, gm.matrixMultiply(m1, m2), '*');		
+	}
+	
+	
+	
+/**  测试RationalMatrix类 */
+	@Test
+	public void testRationalMatrix() {
+		Rational[][] r1 = new Rational[3][3];
+		Rational[][] r2 = new Rational[3][3];
+		for (int i = 0; i < r1.length; i++)
+			for (int j = 0; j < r1[0].length; j++) {
+				r1[i][j] = new Rational(i + 1, j + 5);
+				r2[i][j] = new Rational(i + 1, j + 6);
+			}
+		
+		GenericMatrix<Rational> rm = new RationalMatrix();
+		
+		rm.printResult(r1, r2, rm.matrixAdd(r1, r2), '+');
+		System.out.println("");
+		rm.printResult(r1, r2, rm.matrixMultiply(r1, r2), '*');
+	}
